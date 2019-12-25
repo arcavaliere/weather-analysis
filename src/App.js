@@ -1,24 +1,35 @@
 import React from 'react';
-import logo from './logo.svg';
+import {createStore, applyMiddleware} from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import rootSaga from "./sagas/sagas";
+import { weatherStations } from "./reducers"
 import './App.css';
+import { fetchWeatherStations, clearWeatherStations } from './actions';
+
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(
+  weatherStations,
+  applyMiddleware(sagaMiddleware)
+)
+
+sagaMiddleware.run(rootSaga);
+
+console.log(store.getState())
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div>
+        <button onClick={() => store.dispatch(fetchWeatherStations(["NY"]))}>
+          NYS Weather Station!
+        </button>
+        <button onClick={() => store.dispatch(clearWeatherStations())}>
+          Clear Weather Stations!
+        </button>
+        <button onClick={() => console.log(store.getState())}>
+          Display State
+        </button>
+      </div>
     </div>
   );
 }
