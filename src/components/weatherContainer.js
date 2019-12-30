@@ -1,48 +1,70 @@
-import { dispatch } from "redux";
-import { React } from "react"
-import {FETCH_WEATHER_STATIONS} from "../constants"
-import { Component } from "react";
+import React from "react";
+import { connect } from "react-redux";
+import { setActiveWeatherStation, setActiveState, fetchWeatherStations, fetchWeatherStationObservations } from "../actions";
 
-export const DisplayWeather = ({temperature, windSpeed, pressure}) => {
+const WeatherStationsByState = ({stateAbbreviation, changeActiveState, getWeatherStationsByState}) => {
     return (
         <div>
-            <span value={temperature}/>
-            <span value={windSpeed}/>
-            <span value={pressure}/>
+            <input type="text" value={stateAbbreviation} onChange={changeActiveState}/>
+            <button onClick={(e) => getWeatherStationsByState(stateAbbreviation, e)}>Get Weather Stations</button>
         </div>
-    )
-};
+    );
+}
 
-export const FetchWeatherStationsButton = ({onCLick}) => {
+const changeActiveState = (event) => {
+    return setActiveState(event.target.value);
+}
+
+const getWeatherStationsByState = (state, event) => {
+    return fetchWeatherStations([state])
+}
+
+const mapWeatherStationsByStateToProps = (state) => {
+    return {
+        stateAbbreviation: state.activeState
+    }
+}
+
+const mapWeatherStationsByStateDispatchToProps = {
+    changeActiveState,
+    getWeatherStationsByState
+}
+
+export const ConnectedWeatherStationsByState = connect(mapWeatherStationsByStateToProps, mapWeatherStationsByStateDispatchToProps)(WeatherStationsByState);
+
+// WEATHER STATIONS
+const WeatherStationsSelector = ({stationList, activeStation, changeActiveStation, getStationObservations}) => {
     return (
         <div>
-            <button name="Get Weather Stations"
-            onClick={e => {
-                e.preventDefault()
-                onCLick()
-            }}/>
+        <select value={activeStation} onChange={changeActiveStation}>
+            {stationList.map(station => {
+                return <option key={station.url} value={station.url}>{station.url}</option>
+            })}
+        </select>
+        <button onClick={(e) => getStationObservations(activeStation)}>Get Station Observations!</button>
         </div>
     )
 }
 
-export const FetchWeatherStationsInput = () => {
-    return (
-        <div>
-            <input value=""/>
-        </div>
-    )
+
+const mapStateToProps = (state) => {
+    return {
+        stationList: state.stations,
+        activeStation: state.activeStation
+    }
 }
 
-// export const WeatherStationsList = ({stations}) => {
-//     return (
-//         <div>
-//             <ul>
-//                 {stations.map( (station) => 
-//                     <li>
-//                         {station.url}
-//                     </li>
-//                 )}
-//             </ul>
-//         </div>
-//     )
-// }
+const mapDispatchToProps = dispatch => {
+   return {
+        changeActiveStation: (event) => {
+            dispatch(setActiveWeatherStation(event.target.value))
+        },
+        getStationObservations: (activeStation) => {
+            console.log(activeStation)
+            dispatch(fetchWeatherStationObservations(activeStation))
+        }
+    }
+}
+const ConnectedWeatherStationsSelector = connect(mapStateToProps, mapDispatchToProps)(WeatherStationsSelector);
+
+export default ConnectedWeatherStationsSelector;
