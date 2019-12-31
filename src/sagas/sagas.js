@@ -1,4 +1,4 @@
-import { call, fork, put, takeLatest, all } from "redux-saga/effects";
+import { call, put, takeLatest, all, takeEvery } from "redux-saga/effects";
 import { 
     FETCH_WEATHER_STATIONS_FAILED, 
     FETCH_WEATHER_STATIONS, 
@@ -27,16 +27,16 @@ const watchFetchWeatherStationsByState = function* () {
 const fetchWeaterStationObservations = function* (state) {
     console.log(state)
     try {
-        const response = yield fork(apiCall, `${state.stationUrl}/observations`)
-        yield put({type: FETCH_WEATHER_STATION_OBSERVATIONS_SUCCEEDED, response})
+        const response = yield call(apiCall, `${state.stationUrl}/observations`)
+        yield put({type: FETCH_WEATHER_STATION_OBSERVATIONS_SUCCEEDED, stationId: state.stationUrl, observations: response.features})
     }
     catch (error) {
-        yield put({type: FETCH_WEATHER_STATION_OBSERVATIONS_FAILED})
+        yield put({type: FETCH_WEATHER_STATION_OBSERVATIONS_FAILED, stationId: state.stationUrl, error})
     }
 }
 
 const watchFetchWeatherStationObservations = function* () {
-    yield takeLatest(FETCH_WEATHER_STATION_OBSERVATIONS, fetchWeaterStationObservations)
+    yield takeEvery(FETCH_WEATHER_STATION_OBSERVATIONS, fetchWeaterStationObservations)
 }
 
 export default function* rootSaga() {
