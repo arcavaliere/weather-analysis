@@ -2,14 +2,14 @@ import React from 'react';
 import {createStore, applyMiddleware} from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from "./sagas/sagas";
-import { weatherStations } from "./reducers"
+import { rootReducer } from "./reducers"
 import './App.css';
 import ConnectedWeatherStationsSelector, { ConnectedWeatherStationsByState } from './components/weatherContainer';
 import { Provider } from 'react-redux';
 
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(
-  weatherStations,
+  rootReducer,
   applyMiddleware(sagaMiddleware)
 )
 
