@@ -9,8 +9,10 @@ import {
     FETCH_WEATHER_STATION_OBSERVATIONS_SUCCEEDED,
     FETCH_WEATHER_STATION_OBSERVATIONS_FAILED
 } from "./constants";
+import { combineReducers } from 'redux';
 
-const pendingWeatherStationsState = (state) => {
+
+const pendingRequestState = (state) => {
     return Object.assign({}, state, {requestStatus: 'PENDING!'})
 }
 
@@ -40,11 +42,10 @@ const setActiveState = (state, action) => {
     return Object.assign({}, state, {activeState: action.activeState})
 }
 
-export function weatherStations(state = {requestStatus: 'INITIAL!', stations: [], error: null}, action) {
-    console.log(action.type)
+export function weatherStations(state = {requestStatus: 'INITIAL!', stations: [], activeStations: null, activeState: null, error: null}, action) {
     switch (action.type) {
         case FETCH_WEATHER_STATIONS:
-            return pendingWeatherStationsState(state);
+            return pendingRequestState(state);
         case FETCH_WEATHER_STATIONS_SUCCEEDED:
             return addWeatherStations(state, action)
         case FETCH_WEATHER_STATIONS_FAILED:
@@ -61,18 +62,43 @@ export function weatherStations(state = {requestStatus: 'INITIAL!', stations: []
 }
 
 const updateStationObservations = (state, action) => {
-    return Object.assign({}, state, {observations: action.observations})
+    return Object.assign({}, state,
+        {
+            [action.stationId]: 
+                {
+                    requestStatus: "SUCCESS!",
+                    observations: action.observations
+                }
+        }
+    )
 }
 
 const errorWeatherStationObservations = (state, action) => {
-    return Object.assign({}, state, {error: action.error})
+    return Object.assign({}, state, 
+        {
+            [action.stationId]: {
+                requestStatus: "ERROR!",
+                observations: [],
+                error: action.error
+            }
+        }
+    )
 }
 
-export function weatherStationObservations(state = {requestStatus: 'INITIAL!', observations: [], activeStation: null, error: null}, action) {
+const pendingWeatherStationObservations = (state, action) => {
+    return Object.assign({}, state,
+        {
+            [action.stationUrl]: {
+                requestStatus: "PENDING!"
+            }
+        })
+} 
+
+export function weatherStationObservations(state = [], action) {
     console.log(action.type)
     switch (action.type) {
         case FETCH_WEATHER_STATION_OBSERVATIONS:
-            return pendingWeatherStationsState(state);
+            return pendingWeatherStationObservations(state, action);
         case FETCH_WEATHER_STATION_OBSERVATIONS_SUCCEEDED:
             return updateStationObservations(state, action);
         case FETCH_WEATHER_STATION_OBSERVATIONS_FAILED:
@@ -82,4 +108,8 @@ export function weatherStationObservations(state = {requestStatus: 'INITIAL!', o
     }
 }
 
+export const rootReducer = combineReducers({
+    weatherStations,
+    weatherStationObservations
+})
 
