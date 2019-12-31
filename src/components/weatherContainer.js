@@ -21,7 +21,7 @@ const getWeatherStationsByState = (state, event) => {
 
 const mapWeatherStationsByStateToProps = (state) => {
     return {
-        stateAbbreviation: state.activeState
+        stateAbbreviation: state.weatherStations.activeState
     }
 }
 
@@ -47,14 +47,15 @@ const WeatherStationsSelector = ({stationList, activeStation, changeActiveStatio
 }
 
 
-const mapStateToProps = (state) => {
+const mapStateToPropsWeatherStationsSelector = (state) => {
+    console.log(state)
     return {
-        stationList: state.stations,
-        activeStation: state.activeStation
+        stationList: state.weatherStations.stations,
+        activeStation: state.weatherStations.activeStation
     }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToPropsWeatherStationsSelector = dispatch => {
    return {
         changeActiveStation: (event) => {
             dispatch(setActiveWeatherStation(event.target.value))
@@ -65,6 +66,6 @@ const mapDispatchToProps = dispatch => {
         }
     }
 }
-const ConnectedWeatherStationsSelector = connect(mapStateToProps, mapDispatchToProps)(WeatherStationsSelector);
+const ConnectedWeatherStationsSelector = connect(mapStateToPropsWeatherStationsSelector, mapDispatchToPropsWeatherStationsSelector)(WeatherStationsSelector);
 
 export default ConnectedWeatherStationsSelector;
