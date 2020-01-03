@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { setActiveWeatherStation, setActiveState, fetchWeatherStations, fetchWeatherStationObservations } from "../actions";
+import { setActiveWeatherStation, setActiveState, fetchWeatherStations, fetchWeatherStationObservations, requestMinObservations, requestMaxObservations } from "../actions";
 
 const WeatherStationsByState = ({stateAbbreviation, changeActiveState, getWeatherStationsByState}) => {
     return (
@@ -48,7 +48,6 @@ const WeatherStationsSelector = ({stationList, activeStation, changeActiveStatio
 
 
 const mapStateToPropsWeatherStationsSelector = (state) => {
-    console.log(state)
     return {
         stationList: state.weatherStations.stations,
         activeStation: state.weatherStations.activeStation
@@ -61,11 +60,53 @@ const mapDispatchToPropsWeatherStationsSelector = dispatch => {
             dispatch(setActiveWeatherStation(event.target.value))
         },
         getStationObservations: (activeStation) => {
-            console.log(activeStation)
             dispatch(fetchWeatherStationObservations(activeStation))
         }
     }
 }
-const ConnectedWeatherStationsSelector = connect(mapStateToPropsWeatherStationsSelector, mapDispatchToPropsWeatherStationsSelector)(WeatherStationsSelector);
+export const ConnectedWeatherStationsSelector = connect(mapStateToPropsWeatherStationsSelector, mapDispatchToPropsWeatherStationsSelector)(WeatherStationsSelector);
 
-export default ConnectedWeatherStationsSelector;
+
+const WeatherStationDataDisplay = ({weatherStationObservations, displayStats}) => {
+    return (
+        <div>
+            <ul>
+                {Object.keys(weatherStationObservations).map( stationURL => {
+                    return <div>
+                    <li key={stationURL}>
+                        <ul>
+                            <li key={stationURL}>{stationURL}</li>
+                            <li key={weatherStationObservations[stationURL].min} value={weatherStationObservations[stationURL].min}>MIN: {weatherStationObservations[stationURL].min}</li>
+                            <li key={weatherStationObservations[stationURL].max} value={weatherStationObservations[stationURL].max}>MAX: {weatherStationObservations[stationURL].max}</li>
+                        </ul>
+                    </li>
+                    <button onClick={(e) => {
+                            if(weatherStationObservations[stationURL].requestStatus !== "PENDING"){
+                            displayStats(stationURL, 
+                            weatherStationObservations[stationURL].observations.map( data => {
+                                return data.properties.temperature.value;
+                        }))}}}>Get Stats!</button>
+                </div>
+                })}
+            </ul>
+        </div>
+    )
+}
+
+const mapStateToPropsWeatherStationDataDisplay = (state) => {
+    const {weatherStationObservations} = state;
+    console.log(state)
+    console.log(Object.keys(weatherStationObservations))
+    return {weatherStationObservations};
+}
+
+const mapDispatchToPropsWeatherStationDataDisplay = dispatch => {
+    return {
+        displayStats: (stationUrl, observations) => {
+            dispatch(requestMinObservations(stationUrl, observations))
+            dispatch(requestMaxObservations(stationUrl, observations))
+        }
+    }
+}
+
+export const ConnectedWeatherStationDataDisplay = connect(mapStateToPropsWeatherStationDataDisplay, mapDispatchToPropsWeatherStationDataDisplay)(WeatherStationDataDisplay);

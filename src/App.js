@@ -4,7 +4,7 @@ import createSagaMiddleware from 'redux-saga';
 import rootSaga from "./sagas/sagas";
 import { rootReducer } from "./reducers"
 import './App.css';
-import ConnectedWeatherStationsSelector, { ConnectedWeatherStationsByState } from './components/weatherContainer';
+import {ConnectedWeatherStationDataDisplay ,ConnectedWeatherStationsSelector,ConnectedWeatherStationsByState } from './components/weatherContainer';
 import { Provider } from 'react-redux';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -23,6 +23,7 @@ function App() {
     <div className="App">
       <ConnectedWeatherStationsByState/>
       <ConnectedWeatherStationsSelector/>
+      <ConnectedWeatherStationDataDisplay/>
       <button onClick={() => console.log(store.getState())}>
           Display State
         </button>

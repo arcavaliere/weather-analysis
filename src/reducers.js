@@ -7,7 +7,13 @@ import {
     SET_ACTIVE_STATE,
     FETCH_WEATHER_STATION_OBSERVATIONS,
     FETCH_WEATHER_STATION_OBSERVATIONS_SUCCEEDED,
-    FETCH_WEATHER_STATION_OBSERVATIONS_FAILED
+    FETCH_WEATHER_STATION_OBSERVATIONS_FAILED,
+    CALCULATE_MIN_OBSERVATIONS_REQUESTED,
+    CALCULATE_MAX_OBSERVATIONS_REQUESTED,
+    CALCULATE_MAX_OBSERVATIONS_SUCCEEDED,
+    CALCULATE_MAX_OBSERVATIONS_FAILED,
+    CALCULATE_MIN_OBSERVATIONS_SUCCEEDED,
+    CALCULATE_MIN_OBSERVATIONS_FAILED
 } from "./constants";
 import { combineReducers } from 'redux';
 
@@ -94,6 +100,60 @@ const pendingWeatherStationObservations = (state, action) => {
         })
 } 
 
+const pendingMaxObservation = (state, action) => {
+    return Object.assign({}, state,
+        {
+            [action.stationId]: Object.assign({}, state[action.stationId], {
+                max: "PENDING!"
+            })
+        })
+}
+
+const maxObservationSucceeded = (state, action) => {
+    return Object.assign({}, state,
+        {
+            [action.stationId]: Object.assign({}, state[action.stationId], {
+                max: action.maxObservation
+            })
+        })
+}
+
+const maxObservationFailed = (state, action) => {
+    return Object.assign({}, state,
+        {
+            [action.stationId]: Object.assign({}, state[action.stationId], {
+                max: action.error
+            })
+        })
+}
+
+const pendingMinObservation = (state, action) => {
+    return Object.assign({}, state,
+        {
+            [action.stationId]: Object.assign({}, state[action.stationId], {
+                min: "PENDING!"
+            })
+        })
+}
+
+const minObservationSucceeded = (state, action) => {
+    return Object.assign({}, state, 
+        {
+            [action.stationId]: Object.assign({}, state[action.stationId], {
+                min: action.minObservation
+            })
+        })
+}
+
+const minObservationFailed = (state, action) => {
+    return Object.assign({}, state,
+        {
+            [action.stationId]: Object.assign({}, state[action.stationId], {
+                min: action.error
+            })
+        })
+}
+
 export function weatherStationObservations(state = [], action) {
     console.log(action.type)
     switch (action.type) {
@@ -103,6 +163,18 @@ export function weatherStationObservations(state = [], action) {
             return updateStationObservations(state, action);
         case FETCH_WEATHER_STATION_OBSERVATIONS_FAILED:
             return errorWeatherStationObservations(state, action);
+        case CALCULATE_MIN_OBSERVATIONS_REQUESTED:
+            return pendingMinObservation(state, action);
+        case CALCULATE_MAX_OBSERVATIONS_REQUESTED:
+            return pendingMaxObservation(state, action);
+        case CALCULATE_MAX_OBSERVATIONS_SUCCEEDED:
+            return maxObservationSucceeded(state, action);
+        case CALCULATE_MAX_OBSERVATIONS_FAILED:
+            return maxObservationFailed(state, action);
+        case CALCULATE_MIN_OBSERVATIONS_SUCCEEDED:
+            return minObservationSucceeded(state, action);
+        case CALCULATE_MIN_OBSERVATIONS_FAILED:
+            return minObservationFailed(state, action);
         default:
             return state;
     }
